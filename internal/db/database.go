@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"task-planner/internal/model"
+	"task-manager/internal/model"
 
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"

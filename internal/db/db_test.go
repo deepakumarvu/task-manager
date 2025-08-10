@@ -1,8 +1,8 @@
 package db_test
 
 import (
-	"task-planner/internal/db"
-	"task-planner/internal/model"
+	"task-manager/internal/db"
+	"task-manager/internal/model"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"

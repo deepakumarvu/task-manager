@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"task-planner/internal/api"
-	"task-planner/internal/db"
-	"task-planner/internal/model"
+	"task-manager/internal/api"
+	"task-manager/internal/db"
+	"task-manager/internal/model"
 
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo/v2"

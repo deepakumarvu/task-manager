@@ -1,4 +1,4 @@
-module task-planner
+module task-manager
 
 go 1.24
 

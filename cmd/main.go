@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"task-planner/internal/api"
-	"task-planner/internal/db"
+	"task-manager/internal/api"
+	"task-manager/internal/db"
 
 	"github.com/gin-gonic/gin"
 )

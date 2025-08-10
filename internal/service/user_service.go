@@ -1,8 +1,8 @@
 package service
 
 import (
-	"task-planner/internal/db"
-	"task-planner/internal/model"
+	"task-manager/internal/db"
+	"task-manager/internal/model"
 )
 
 type UserService struct {

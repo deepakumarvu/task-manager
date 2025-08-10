@@ -1,6 +1,6 @@
 package db
 
-import "task-planner/internal/model"
+import "task-manager/internal/model"
 
 type DB interface {
 	// User methods

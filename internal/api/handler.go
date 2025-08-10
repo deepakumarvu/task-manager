@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 	"strings"
-	"task-planner/internal/db"
-	"task-planner/internal/model"
-	"task-planner/internal/service"
+	"task-manager/internal/db"
+	"task-manager/internal/model"
+	"task-manager/internal/service"
 	"time"
 	"unicode/utf8"
 
