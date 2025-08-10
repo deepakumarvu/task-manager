@@ -2,32 +2,6 @@
 
 This project is a Task Management Web Service built in Go, providing a RESTful API to manage tasks and users. It supports CRUD operations for both entities, with strong validation and user-context for all task operations.
 
-## Project Structure
-
-```
-task-planner
-├── cmd
-│   └── main.go                # Entry point of the application
-├── internal
-│   ├── api
-│   │   └── handler.go         # HTTP handlers for the RESTful API
-│   ├── db
-│   │   ├── database.go        # Database implementation (SQLite)
-│   │   └── interface.go       # Database interface abstraction
-│   ├── model
-│   │   ├── task.go            # Task struct definition
-│   │   └── user.go            # User struct definition
-│   └── service
-│       └── task_service.go    # Business logic for managing tasks
-├── test
-│   ├── api_test.go            # Ginkgo tests for API handlers and validation
-│   ├── db_test.go             # Unit tests for database operations
-│   └── service_test.go        # Unit tests for task service
-├── go.mod                     # Module definition file
-├── go.sum                     # Module dependency checksums
-└── README.md                  # Project documentation
-```
-
 ## Database Plug-and-Play
 
 The project uses a database interface abstraction (`internal/db/interface.go`).  
@@ -146,6 +120,137 @@ To run the unit and API tests (Ginkgo required):
 ```
 go test ./...
 ginkgo ./test
+```
+
+## CLI
+
+```sh
+❯ go run cli.go     
+Task CLI. Type 'help' for commands.
+> help
+
+Commands:
+  create-user           - Create a new user (prompts for name/email)
+  set-user <user_id>    - Set current session user
+  get-user              - Get current user info
+  list-users            - List all users
+  delete-user           - Delete current user
+  create-task           - Create a new task (prompts for details)
+  get-task <task_id>    - Get a task by ID
+  list-tasks            - List tasks for current user
+  update-task <task_id> - Update a task (prompts for details)
+  delete-task <task_id> - Delete a task
+  help                  - Show this help
+  exit/quit             - Exit CLI
+> list-users
+Status: 200
+[
+  {
+    "id": "953730b1-e3d4-4dbe-85a4-8244347a8f70",
+    "name": "Alice",
+    "email": "alice@example.com"
+  },
+  {
+    "id": "9638fe95-5845-4011-902c-f3bcc4c821df",
+    "name": "Deepak",
+    "email": "deepak@example.com"
+  }
+]
+> set-user 9638fe95-5845-4011-902c-f3bcc4c821df
+Session user set to: 9638fe95-5845-4011-902c-f3bcc4c821df
+> create-task
+title: New Task
+description: Some Desc
+due_date: 2025-08-10T03:04:10Z
+status: pending
+Status: 201
+{
+  "id": "6b9436ad-a159-46c8-86ba-b9bfd43d5cd1",
+  "title": "New Task",
+  "description": "Some Desc",
+  "due_date": "2025-08-10T03:04:10Z",
+  "status": "pending",
+  "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+}
+> list-tasks
+Status: 200
+[
+  {
+    "id": "32c9f25a-bd7f-4c24-bdff-8c9b8a977ce7",
+    "title": "New Title",
+    "description": "Some Desc",
+    "due_date": "2025-12-30T00:00:00Z",
+    "status": "done",
+    "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+  },
+  {
+    "id": "6b9436ad-a159-46c8-86ba-b9bfd43d5cd1",
+    "title": "New Task",
+    "description": "Some Desc",
+    "due_date": "2025-08-10T03:04:10Z",
+    "status": "pending",
+    "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+  }
+]
+> get-task 6b9436ad-a159-46c8-86ba-b9bfd43d5cd1
+Status: 200
+{
+  "id": "6b9436ad-a159-46c8-86ba-b9bfd43d5cd1",
+  "title": "New Task",
+  "description": "Some Desc",
+  "due_date": "2025-08-10T03:04:10Z",
+  "status": "pending",
+  "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+}
+> update-task 6b9436ad-a159-46c8-86ba-b9bfd43d5cd1
+title: 
+description: 
+due_date: 
+status: 
+Status: 400
+{
+  "error": "at least one field must be updated"
+}
+> update-task 6b9436ad-a159-46c8-86ba-b9bfd43d5cd1
+title: 
+description: 
+due_date: 
+status: in_progress
+Status: 200
+{
+  "id": "6b9436ad-a159-46c8-86ba-b9bfd43d5cd1",
+  "title": "",
+  "description": "",
+  "due_date": "",
+  "status": "in_progress",
+  "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+}
+> get-task 6b9436ad-a159-46c8-86ba-b9bfd43d5cd1
+Status: 200
+{
+  "id": "6b9436ad-a159-46c8-86ba-b9bfd43d5cd1",
+  "title": "New Task",
+  "description": "Some Desc",
+  "due_date": "2025-08-10T03:04:10Z",
+  "status": "in_progress",
+  "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+}
+> delete-task 6b9436ad-a159-46c8-86ba-b9bfd43d5cd1
+Status: 200
+
+> list-tasks
+Status: 200
+[
+  {
+    "id": "32c9f25a-bd7f-4c24-bdff-8c9b8a977ce7",
+    "title": "New Title",
+    "description": "Some Desc",
+    "due_date": "2025-12-30T00:00:00Z",
+    "status": "done",
+    "user_id": "9638fe95-5845-4011-902c-f3bcc4c821df"
+  }
+]
+> quit
 ```
 
 ## License
