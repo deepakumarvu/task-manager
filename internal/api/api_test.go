@@ -250,16 +250,6 @@ var _ = Describe("Task Management API", func() {
 				Expect(w.Body.String()).To(ContainSubstring("Updated Task"))
 			})
 
-			It("should not update a task with missing title", func() {
-				updatedTask := model.Task{Title: "", Description: "Updated desc"}
-				updatedJson, _ := json.Marshal(updatedTask)
-				req, _ := http.NewRequest("PUT", "/users/"+userID+"/tasks/"+taskID, bytes.NewBuffer(updatedJson))
-				req.Header.Set("Content-Type", "application/json")
-				w := httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
-			})
-
 			It("should not update a task with invalid status", func() {
 				// Create a valid task first
 				task := model.Task{Title: "Test Task", Description: "desc", DueDate: "2025-12-31T10:00:00Z", Status: "pending"}
@@ -271,9 +261,19 @@ var _ = Describe("Task Management API", func() {
 				var createdTask model.Task
 				json.Unmarshal(w.Body.Bytes(), &createdTask)
 
-				// Try to update with invalid status
-				updatedTask := model.Task{Title: "Updated Task", Description: "desc", DueDate: "2025-12-31T10:00:00Z", Status: "bad_status"}
+				// Update the task with valid status
+				updatedTask := model.Task{Status: "in_progress"}
 				updatedJson, _ := json.Marshal(updatedTask)
+				req, _ = http.NewRequest("PUT", "/users/"+userID+"/tasks/"+createdTask.ID, bytes.NewBuffer(updatedJson))
+				req.Header.Set("Content-Type", "application/json")
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+				Expect(w.Body.String()).To(ContainSubstring("in_progress"))
+
+				// Try to update with invalid status
+				updatedTask = model.Task{Status: "bad_status"}
+				updatedJson, _ = json.Marshal(updatedTask)
 				req, _ = http.NewRequest("PUT", "/users/"+userID+"/tasks/"+createdTask.ID, bytes.NewBuffer(updatedJson))
 				req.Header.Set("Content-Type", "application/json")
 				w = httptest.NewRecorder()
@@ -302,6 +302,27 @@ var _ = Describe("Task Management API", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 				Expect(w.Body.String()).To(ContainSubstring("due_date must be ISO 8601 format"))
+			})
+
+			It("should not update a task with no fields", func() {
+				// Create a valid task first
+				task := model.Task{Title: "Test Task", Description: "desc", DueDate: "2025-12-31T10:00:00Z", Status: "pending"}
+				jsonData, _ := json.Marshal(task)
+				req, _ := http.NewRequest("POST", "/users/"+userID+"/tasks", bytes.NewBuffer(jsonData))
+				req.Header.Set("Content-Type", "application/json")
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				var createdTask model.Task
+				json.Unmarshal(w.Body.Bytes(), &createdTask)
+				// Try to update with no fields
+				updatedTask := model.Task{}
+				updatedJson, _ := json.Marshal(updatedTask)
+				req, _ = http.NewRequest("PUT", "/users/"+userID+"/tasks/"+createdTask.ID, bytes.NewBuffer(updatedJson))
+				req.Header.Set("Content-Type", "application/json")
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+				Expect(w.Body.String()).To(ContainSubstring("at least one field must be updated"))
 			})
 
 			It("should delete a task", func() {

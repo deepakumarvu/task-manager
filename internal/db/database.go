@@ -120,9 +120,38 @@ func (s *SQLiteDB) ListTasks(userID string, status string) ([]model.Task, error)
 }
 
 func (s *SQLiteDB) UpdateTask(task *model.Task) error {
+	query := "UPDATE tasks SET "
+	updates := []string{}
+	args := []any{}
+	if task.Title != "" {
+		updates = append(updates, "title = ?")
+		args = append(args, task.Title)
+	}
+	if task.Description != "" {
+		updates = append(updates, "description = ?")
+		args = append(args, task.Description)
+	}
+	if task.DueDate != "" {
+		updates = append(updates, "due_date = ?")
+		args = append(args, task.DueDate)
+	}
+	if task.Status != "" {
+		updates = append(updates, "status = ?")
+		args = append(args, task.Status)
+	}
+	if len(updates) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+	query += updates[0]
+	for _, update := range updates[1:] {
+		query += ", " + update
+	}
+	query += " WHERE id = ? AND user_id = ?"
+	fmt.Println("Executing query:", query)
+	args = append(args, task.ID, task.UserID)
 	res, err := s.conn.Exec(
-		"UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ? WHERE id = ? AND user_id = ?",
-		task.Title, task.Description, task.DueDate, task.Status, task.ID, task.UserID,
+		query,
+		args...,
 	)
 	if err != nil {
 		return err

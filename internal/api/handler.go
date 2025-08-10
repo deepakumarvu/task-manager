@@ -209,22 +209,39 @@ func updateTask(c *gin.Context, taskService *service.TaskService) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	titleLen := utf8.RuneCountInString(strings.TrimSpace(task.Title))
-	if titleLen < minNameLen || titleLen > maxNameLen {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "title must be between 2 and 50 characters"})
-		return
+	var atLeastOneField bool
+	if task.Title != "" {
+		titleLen := utf8.RuneCountInString(strings.TrimSpace(task.Title))
+		if titleLen < minNameLen || titleLen > maxNameLen {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "title must be between 2 and 50 characters"})
+			return
+		}
+		atLeastOneField = true
 	}
-	descLen := utf8.RuneCountInString(strings.TrimSpace(task.Description))
-	if descLen > maxDescLen {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "description must be at most 200 characters"})
-		return
+	if task.Description != "" {
+		descLen := utf8.RuneCountInString(strings.TrimSpace(task.Description))
+		if descLen > maxDescLen {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "description must be at most 200 characters"})
+			return
+		}
+		atLeastOneField = true
 	}
-	if !isValidStatus(task.Status) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status"})
-		return
+	if task.Status != "" {
+		if !isValidStatus(task.Status) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status"})
+			return
+		}
+		atLeastOneField = true
 	}
-	if !isValidISO8601(task.DueDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "due_date must be ISO 8601 format (RFC3339)"})
+	if task.DueDate != "" {
+		if !isValidISO8601(task.DueDate) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "due_date must be ISO 8601 format (RFC3339)"})
+			return
+		}
+		atLeastOneField = true
+	}
+	if !atLeastOneField {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "at least one field must be updated"})
 		return
 	}
 	task.ID = taskID
