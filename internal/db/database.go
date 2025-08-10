@@ -138,8 +138,18 @@ func (s *SQLiteDB) UpdateTask(task *model.Task) error {
 }
 
 func (s *SQLiteDB) DeleteTask(id string, userID string) error {
-	_, err := s.conn.Exec("DELETE FROM tasks WHERE id = ? AND user_id = ?", id, userID)
-	return err
+	res, err := s.conn.Exec("DELETE FROM tasks WHERE id = ? AND user_id = ?", id, userID)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrTaskNotFound
+	}
+	return nil
 }
 
 // User methods
@@ -186,6 +196,16 @@ func (s *SQLiteDB) ListUsers() ([]model.User, error) {
 }
 
 func (s *SQLiteDB) DeleteUser(id string) error {
-	_, err := s.conn.Exec("DELETE FROM users WHERE id = ?", id)
+	res, err := s.conn.Exec("DELETE FROM users WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrUserNotFound
+	}
 	return err
 }
